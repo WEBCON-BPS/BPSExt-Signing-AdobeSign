@@ -1,0 +1,88 @@
+﻿<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup Label="MainConfig">
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{2BFC1F3C-9A02-4348-9138-CAEA68F9FD6A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>WebCon.BpsExt.Signing.AdobeSign</RootNamespace>
+    <AssemblyName>WebCon.BpsExt.Signing.AdobeSign</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetOfficeVersion>15.0</TargetOfficeVersion>
+    <FileAlignment>512</FileAlignment>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>tmpKey.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WebCon.WorkFlow.SDK, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c30f1f18c194ceba, processorArchitecture=MSIL">
+      <HintPath>..\packages\WEBCON.BPS.2020.SDK.Libraries.20.1.1.64\lib\WebCon.WorkFlow.SDK.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CustomActions\AllStatus\CheckAllDocStatusAction.cs" />
+    <Compile Include="CustomActions\AllStatus\CheckAllDocStatusActionConfig.cs" />
+    <Compile Include="CustomActions\Helpers\AdobeSignHelper.cs" />
+    <Compile Include="CustomActions\Delete\DeleteAgreementAction.cs" />
+    <Compile Include="CustomActions\Delete\DeleteAgreementActionConfig.cs" />
+    <Compile Include="CustomActions\Download\DownloadDocAction.cs" />
+    <Compile Include="CustomActions\Download\DownloadDocActionConfig.cs" />
+    <Compile Include="CustomActions\Helpers\AttachmentHelper.cs" />
+    <Compile Include="CustomActions\Models\Configuration\AttachmentConfig.cs" />
+    <Compile Include="CustomActions\Models\GlobalStatusResponse.cs" />
+    <Compile Include="CustomActions\Models\RemindRequest.cs" />
+    <Compile Include="CustomActions\Models\SelfSignResponse.cs" />
+    <Compile Include="CustomActions\Models\SendRequest.cs" />
+    <Compile Include="CustomActions\Models\SendResponse.cs" />
+    <Compile Include="CustomActions\Models\SingleStatusResponse.cs" />
+    <Compile Include="CustomActions\Models\Statuses.cs" />
+    <Compile Include="CustomActions\Reminders\SendReminderAction.cs" />
+    <Compile Include="CustomActions\Reminders\SendReminderActionConfig.cs" />
+    <Compile Include="CustomActions\SendAndSignEnvelope\SendEnvelopeToEmbededSign.cs" />
+    <Compile Include="CustomActions\SendAndSignEnvelope\SendEnvelopeToEmbededSignConfig.cs" />
+    <Compile Include="CustomActions\SendEnvelope\SendEnvelopeAction.cs" />
+    <Compile Include="CustomActions\SendEnvelope\SendEnvelopeActionConfig.cs" />
+    <Compile Include="CustomActions\Models\UriModel.cs" />
+    <Compile Include="CustomActions\Status\CheckDocStatusAction.cs" />
+    <Compile Include="CustomActions\Status\CheckDocStatusActionConfig.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="tmpKey.snk" />
+    <None Include="WebCon.BpsExt.Signing.AdobeSign.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
