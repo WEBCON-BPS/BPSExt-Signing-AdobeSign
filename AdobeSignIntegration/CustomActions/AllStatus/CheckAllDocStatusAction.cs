@@ -25,7 +25,7 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.AllStatus
             {
                 var api = new AdobeSignHelper(log); 
                 var agreements = api.GetAllStatus(Configuration.TokenValue);
-                CheckAndMoveElements(agreements.userAgreementList?.ToList());
+                CheckAndMoveElements(agreements.userAgreementList?.ToList(), args.Context);
             }
             catch (Exception e)
             {
@@ -40,7 +40,7 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.AllStatus
             }
         }
 
-        private void CheckAndMoveElements(List<Useragreementlist> agreements)
+        private void CheckAndMoveElements(List<Useragreementlist> agreements, ActionWithoutDocumentContext context)
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -48,10 +48,10 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.AllStatus
                            $"FROM WFElements WHERE WFD_STPID = {Configuration.Workflow.StepId}";
 
             var dt = SqlExecutionHelper.GetDataTableForSqlCommandOutsideTransaction(sqlQuery);
-            CheckDocumentsStatus(dt, agreements, sw);
+            CheckDocumentsStatus(dt, agreements, sw, context);
         }
 
-        private void CheckDocumentsStatus(DataTable dt, List<Useragreementlist> agreements, Stopwatch sw)
+        private void CheckDocumentsStatus(DataTable dt, List<Useragreementlist> agreements, Stopwatch sw, ActionWithoutDocumentContext context)
         {
             var time = TimeSpan.FromSeconds(Configuration.Workflow.ExecutionTime);
 
@@ -69,11 +69,11 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.AllStatus
                     switch (signStatus)
                     {
                         case Statuses.Signed:
-                            MoveDocument(wfdId, Configuration.Workflow.SuccessPathId);
+                            MoveDocument(wfdId, Configuration.Workflow.SuccessPathId, context);
                             break;
                         case Statuses.Cancelled:
                         case Statuses.Expired:
-                            MoveDocument(wfdId, Configuration.Workflow.ErrorPathId);
+                            MoveDocument(wfdId, Configuration.Workflow.ErrorPathId, context);
                             break;
                         default:
                             break;
@@ -82,14 +82,15 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.AllStatus
             }
         }
 
-        private void MoveDocument(int docId, int path)
+        private void MoveDocument(int docId, int path, ActionWithoutDocumentContext context)
         {
-            var document = DocumentsManager.GetDocumentByID(docId, true);
-            DocumentsManager.MoveDocumentToNextStep(new MoveDocumentToNextStepParams(document, path)
+            var manager = new DocumentsManager(context);
+            var document = manager.GetDocumentByID(docId, true);
+            manager.MoveDocumentToNextStep(new MoveDocumentToNextStepParams(document, path)
             {
                 ForceCheckout = true,
                 SkipPermissionsCheck = true
-            }); ;
+            });
         }
     }
 }

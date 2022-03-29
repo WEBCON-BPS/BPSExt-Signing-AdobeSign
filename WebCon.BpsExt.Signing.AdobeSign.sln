@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebCon.BpsExt.Signing.AdobeSign", "AdobeSignIntegration\WebCon.BpsExt.Signing.AdobeSign.csproj", "{2BFC1F3C-9A02-4348-9138-CAEA68F9FD6A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebCon.BpsExt.Signing.AdobeSign", "AdobeSignIntegration\WebCon.BpsExt.Signing.AdobeSign.csproj", "{5A8D1D0D-FF94-4266-BC03-DB6B0EE20AE1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2BFC1F3C-9A02-4348-9138-CAEA68F9FD6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2BFC1F3C-9A02-4348-9138-CAEA68F9FD6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2BFC1F3C-9A02-4348-9138-CAEA68F9FD6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2BFC1F3C-9A02-4348-9138-CAEA68F9FD6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A8D1D0D-FF94-4266-BC03-DB6B0EE20AE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A8D1D0D-FF94-4266-BC03-DB6B0EE20AE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A8D1D0D-FF94-4266-BC03-DB6B0EE20AE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A8D1D0D-FF94-4266-BC03-DB6B0EE20AE1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using WebCon.WorkFlow.SDK.ActionPlugins;
 using WebCon.WorkFlow.SDK.ActionPlugins.Model;
-using WebCon.WorkFlow.SDK.Documents.Model.ItemsLists;
+using WebCon.WorkFlow.SDK.Documents.Model.ItemLists;
 using WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers;
 
 namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Reminders
