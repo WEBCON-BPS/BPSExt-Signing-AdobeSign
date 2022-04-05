@@ -14,11 +14,13 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
     {
         internal static AttachmentData GetAttachment(ActionContextInfo context, InputAttConfig config, StringBuilder log)
         {
+            var manager = new DocumentAttachmentsManager(context);
+
             if (config.InputAttType == InputType.Category)
             {
                 log.AppendLine("Downloading attachments by category");
-
-                var allAttachments = DocumentAttachmentsManager.GetAttachments(new GetAttachmentsParams()
+           
+                var allAttachments = manager.GetAttachments(new GetAttachmentsParams()
                 {
                     DocumentId = context.CurrentDocument.ID,
                     IncludeContent = true
@@ -27,8 +29,9 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
                 if (config.CatType == CategoryType.ID)
                 {
                     return allAttachments.FirstOrDefault(x =>
-                    x.FileGroup.ID == config.InputCategoryId.ToString()
-                    && (string.IsNullOrEmpty(config.AttRegularExpression) || Regex.IsMatch(x.FileName, config.AttRegularExpression)));
+                    x.FileGroup != null &&
+                    x.FileGroup.ID == config.InputCategoryId.ToString() &&
+                    (string.IsNullOrEmpty(config.AttRegularExpression) || Regex.IsMatch(x.FileName, config.AttRegularExpression)));
                 }
                 else if (config.CatType == CategoryType.None)
                 {
@@ -49,7 +52,7 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
                 if (attId == null)
                     throw new Exception("Sql query not returning result");
 
-                return DocumentAttachmentsManager.GetAttachment(Convert.ToInt32(attId));
+                return manager.GetAttachment(Convert.ToInt32(attId));
             }
         }
     }

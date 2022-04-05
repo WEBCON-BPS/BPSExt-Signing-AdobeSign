@@ -22,7 +22,7 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Download
                     var docId = args.Context.CurrentDocument.GetFieldValue(Configuration.InputParams.OperationFieldId)?.ToString();
                     var api = new AdobeSignHelper(log);
                     var content = api.GetDocument(docId, Configuration.ApiConfig.TokenValue);
-                    SaveAtt(args.Context.CurrentDocument, content);
+                    SaveAtt(args.Context, content);
                 }
                 else
                 {
@@ -43,10 +43,10 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Download
             }
         }
 
-        private void SaveAtt(WorkFlow.SDK.Documents.Model.CurrentDocumentData currentDocument, byte[] newAttContent)
+        private void SaveAtt(ActionContextInfo context, byte[] newAttContent)
         {
-            var sourceAttData = currentDocument.GetFieldValue(Configuration.AttConfig.AttTechnicalFieldID)?.ToString();
-            var sourceAtt = currentDocument.Attachments.GetByID(Convert.ToInt32(sourceAttData));
+            var sourceAttData = context.CurrentDocument.GetFieldValue(Configuration.AttConfig.AttTechnicalFieldID)?.ToString();
+            var sourceAtt = context.CurrentDocument.Attachments.GetByID(Convert.ToInt32(sourceAttData));
             sourceAtt.Content = newAttContent;
             if (sourceAtt.FileExtension.Equals(".pdf", StringComparison.InvariantCultureIgnoreCase))
                 sourceAtt.FileName = $"{Path.GetFileNameWithoutExtension(sourceAtt.FileName)}{Configuration.AttConfig.AttSufix}{sourceAtt.FileExtension}";
@@ -56,9 +56,9 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Download
             if (!string.IsNullOrEmpty(Configuration.AttConfig.SaveCategory))
             {              
                 sourceAtt.FileGroup = new AttachmentsGroup(Configuration.AttConfig.SaveCategory, null);
-            }            
-
-            DocumentAttachmentsManager.UpdateAttachment(new UpdateAttachmentParams()
+            }
+            var manager = new DocumentAttachmentsManager(context);
+            manager.UpdateAttachment(new UpdateAttachmentParams()
             {
                 Attachment = sourceAtt
             });
