@@ -6,6 +6,7 @@ using WebCon.WorkFlow.SDK.ActionPlugins.Model;
 using WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers;
 using WebCon.WorkFlow.SDK.Documents.Model.Attachments;
 using WebCon.WorkFlow.SDK.Documents.Model;
+using System.Threading.Tasks;
 
 namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.SendAndSignEnvelope
 {
@@ -15,15 +16,15 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.SendAndSignEnvelope
         const string AuthMethod = "PHONE";
         StringBuilder _log = new StringBuilder();
 
-        public override void Run(RunCustomActionParams args)
+        public override async Task RunAsync(RunCustomActionParams args)
         {           
             try
             {
-                var att = AttachmentHelper.GetAttachment(args.Context, Configuration.AttConfig, _log);
+                var att = await AttachmentHelper.GetAttachmentAsync(args.Context, Configuration.AttConfig, _log);
                 if (att == null)
                     throw new Exception("No attachment to signature");              
 
-                var signUrl = CallAdobeApi(att, args.Context.CurrentDocument);                
+                var signUrl = await CallAdobeApiAsync(att, args.Context);                
                 _log.AppendLine($"Document URL: {signUrl}");
                 args.TransitionInfo.RedirectUrl(signUrl);
             }
@@ -36,20 +37,20 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.SendAndSignEnvelope
             finally
             {
                 args.LogMessage = _log.ToString();
-                args.Context.PluginLogger.AppendInfo(_log.ToString());
+                args.Context.PluginLogger?.AppendInfo(_log.ToString());
             }
         }
 
-        private string CallAdobeApi(AttachmentData att, DocumentData currentDocument)
+        private async Task<string> CallAdobeApiAsync(AttachmentData att, ActionContextInfo context)
         {
-            var api = new AdobeSignHelper(_log);
-            var documentId = api.SendDocument(att.Content, Configuration.ApiConfig.TokenValue, $"{att.FileName}.{att.FileExtension}");
-            var agreementsId = api.SendToSig(documentId, Configuration.ApiConfig.TokenValue, Configuration.MessageContent.MailSubject, Configuration.MessageContent.MailBody, GetMemberInfo(), true, Configuration.RedirectUrl);
+            var api = new AdobeSignHelper(_log, context);
+            var documentId = await api.SendDocumentAsync(att.Content, Configuration.ApiConfig.TokenValue, $"{att.FileName}.{att.FileExtension}");
+            var agreementsId = await api.SendToSigAsync(documentId, Configuration.ApiConfig.TokenValue, Configuration.MessageContent.MailSubject, Configuration.MessageContent.MailBody, GetMemberInfo(), true, Configuration.RedirectUrl);
 
-            currentDocument.SetFieldValue(Configuration.AttConfig.AgreementsIdFild, agreementsId);
-            currentDocument.SetFieldValue(Configuration.AttConfig.AttTechnicalFieldID, att.ID);
+            context.CurrentDocument.SetFieldValue(Configuration.AttConfig.AgreementsIdFild, agreementsId);
+            context.CurrentDocument.SetFieldValue(Configuration.AttConfig.AttTechnicalFieldID, att.ID);
 
-            return api.GetSigningURL(Configuration.ApiConfig.TokenValue, agreementsId);
+            return await api.GetSigningURLAsync(Configuration.ApiConfig.TokenValue, agreementsId);
         }
 
         private List<Models.Send.Participantsetsinfo> GetMemberInfo()

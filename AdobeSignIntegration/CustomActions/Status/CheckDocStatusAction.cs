@@ -3,19 +3,20 @@ using System.Text;
 using WebCon.WorkFlow.SDK.ActionPlugins;
 using WebCon.WorkFlow.SDK.ActionPlugins.Model;
 using WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers;
+using System.Threading.Tasks;
 
 namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Status
 {
     public class CheckDocStatusAction : CustomAction<CheckDocStatusActionConfig>
     {
-        public override void Run(RunCustomActionParams args)
+        public override async Task RunAsync(RunCustomActionParams args)
         {
             var log = new StringBuilder();
             try
             {
                 var docId = args.Context.CurrentDocument.GetFieldValue(Configuration.DokFildId)?.ToString();
-                var api = new AdobeSignHelper(log);
-                var status = api.GetStatus(docId, Configuration.TokenValue);
+                var api = new AdobeSignHelper(log, args.Context);
+                var status = await api.GetStatusAsync(docId, Configuration.TokenValue);
                 args.Context.CurrentDocument.SetFieldValue(Configuration.StatusFildId, status);
             }
             catch(Exception e)
@@ -27,7 +28,7 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Status
             finally
             {
                 args.LogMessage = log.ToString();
-                args.Context.PluginLogger.AppendInfo(log.ToString());
+                args.Context.PluginLogger?.AppendInfo(log.ToString());
             }
         }
     }
