@@ -6,12 +6,14 @@ using WebCon.WorkFlow.SDK.ActionPlugins.Model;
 using WebCon.WorkFlow.SDK.Documents;
 using WebCon.WorkFlow.SDK.Documents.Model.Attachments;
 using WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers;
+using System.Threading.Tasks;
+using WebCon.WorkFlow.SDK.Tools.Other;
 
 namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Download
 {
     public class DownloadDocAction : CustomAction<DownloadDocActionConfig>
     {
-        public override void Run(RunCustomActionParams args)
+        public override async Task RunAsync(RunCustomActionParams args)
         {
             var log = new StringBuilder();
             try
@@ -20,9 +22,9 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Download
                 if (!string.IsNullOrEmpty(status) && status.Equals(Models.Statuses.Signed, StringComparison.InvariantCultureIgnoreCase))
                 {
                     var docId = args.Context.CurrentDocument.GetFieldValue(Configuration.InputParams.OperationFieldId)?.ToString();
-                    var api = new AdobeSignHelper(log);
-                    var content = api.GetDocument(docId, Configuration.ApiConfig.TokenValue);
-                    SaveAtt(args.Context, content);
+                    var api = new AdobeSignHelper(log, args.Context);
+                    var content = await api.GetDocumentAsync(docId, Configuration.ApiConfig.TokenValue);
+                    await SaveAttAsync(args.Context, content);
                 }
                 else
                 {
@@ -39,14 +41,14 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Download
             finally
             {
                 args.LogMessage = log.ToString();
-                args.Context.PluginLogger.AppendInfo(log.ToString());
+                args.Context.PluginLogger?.AppendInfo(log.ToString());
             }
         }
 
-        private void SaveAtt(ActionContextInfo context, byte[] newAttContent)
+        private async Task SaveAttAsync(ActionContextInfo context, byte[] newAttContent)
         {
             var sourceAttData = context.CurrentDocument.GetFieldValue(Configuration.AttConfig.AttTechnicalFieldID)?.ToString();
-            var sourceAtt = context.CurrentDocument.Attachments.GetByID(Convert.ToInt32(sourceAttData));
+            var sourceAtt = await context.CurrentDocument.Attachments.GetByIDAsync(Convert.ToInt32(sourceAttData));
             sourceAtt.Content = newAttContent;
             if (sourceAtt.FileExtension.Equals(".pdf", StringComparison.InvariantCultureIgnoreCase))
                 sourceAtt.FileName = $"{Path.GetFileNameWithoutExtension(sourceAtt.FileName)}{Configuration.AttConfig.AttSufix}{sourceAtt.FileExtension}";
@@ -54,14 +56,25 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Download
                 sourceAtt.FileName = $"{Path.GetFileNameWithoutExtension(sourceAtt.FileName)}{Configuration.AttConfig.AttSufix}.pdf";
            
             if (!string.IsNullOrEmpty(Configuration.AttConfig.SaveCategory))
-            {              
-                sourceAtt.FileGroup = new AttachmentsGroup(Configuration.AttConfig.SaveCategory, null);
-            }
+                await SetFileGroup(sourceAtt, Configuration.AttConfig.SaveCategory);
+
             var manager = new DocumentAttachmentsManager(context);
-            manager.UpdateAttachment(new UpdateAttachmentParams()
+            await manager.UpdateAttachmentAsync(new UpdateAttachmentParams()
             {
                 Attachment = sourceAtt
             });
+        }
+
+        private async Task SetFileGroup(NewAttachmentData newAtt, string category)
+        {
+            if (category.Contains("#"))
+            {
+                newAtt.FileGroup = new AttachmentsGroup(TextHelper.GetPairId(category), TextHelper.GetPairName(category));
+                return;
+            }
+
+            var fileGroup = await newAtt.ResolveAsync(category);
+            newAtt.FileGroup = fileGroup ?? new AttachmentsGroup(category);
         }
     }
 }

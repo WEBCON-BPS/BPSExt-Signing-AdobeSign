@@ -6,12 +6,13 @@ using WebCon.WorkFlow.SDK.ActionPlugins;
 using WebCon.WorkFlow.SDK.ActionPlugins.Model;
 using WebCon.WorkFlow.SDK.Documents.Model.ItemLists;
 using WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers;
+using System.Threading.Tasks;
 
 namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Reminders
 {
     public class SendReminderAction : CustomAction<SendReminderActionConfig>
     {
-        public override void Run(RunCustomActionParams args)
+        public override async Task RunAsync(RunCustomActionParams args)
         {
             var log = new StringBuilder();
             try
@@ -20,10 +21,10 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Reminders
                 if (!string.IsNullOrEmpty(status) && !status.Equals(Models.Statuses.Signed, StringComparison.InvariantCultureIgnoreCase))
                 {
                     var docId = args.Context.CurrentDocument.GetFieldValue(Configuration.ApiConfig.OperationFildId)?.ToString();
-                    var api = new AdobeSignHelper(log);
-                    var membersInfo = api.GetMembersIds(docId, Configuration.ApiConfig.TokenValue);
+                    var api = new AdobeSignHelper(log, args.Context);
+                    var membersInfo = await api.GetMembersIdsAsync(docId, Configuration.ApiConfig.TokenValue);
                     var users = GetUsers(args.Context.CurrentDocument.ItemsLists.GetByID(Configuration.Users.SignersList.ItemListId), membersInfo.ToList());
-                    api.SendRemind(docId, Configuration.ApiConfig.TokenValue, users);
+                    await api.SendRemindAsync(docId, Configuration.ApiConfig.TokenValue, users);
                 }
                 else
                 {
@@ -40,7 +41,7 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Reminders
             finally
             {
                 args.LogMessage = log.ToString();
-                args.Context.PluginLogger.AppendInfo(log.ToString());
+                args.Context.PluginLogger?.AppendInfo(log.ToString());
             }
         }       
 

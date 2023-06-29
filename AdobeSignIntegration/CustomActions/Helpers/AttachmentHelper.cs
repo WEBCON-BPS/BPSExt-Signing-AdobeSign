@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using WebCon.BpsExt.Signing.AdobeSign.CustomActions.Models.Configuration;
 using WebCon.WorkFlow.SDK.ActionPlugins.Model;
 using WebCon.WorkFlow.SDK.Documents;
@@ -12,7 +13,7 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
 {
     internal sealed class AttachmentHelper
     {
-        internal static AttachmentData GetAttachment(ActionContextInfo context, InputAttConfig config, StringBuilder log)
+        internal static async Task<AttachmentData> GetAttachmentAsync(ActionContextInfo context, InputAttConfig config, StringBuilder log)
         {
             var manager = new DocumentAttachmentsManager(context);
 
@@ -20,7 +21,7 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
             {
                 log.AppendLine("Downloading attachments by category");
            
-                var allAttachments = manager.GetAttachments(new GetAttachmentsParams()
+                var allAttachments = await manager.GetAttachmentsAsync(new GetAttachmentsParams()
                 {
                     DocumentId = context.CurrentDocument.ID,
                     IncludeContent = true
@@ -48,11 +49,11 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
             {
                 log.AppendLine("Downloading attachments by SQL query");
 
-                var attId = SqlExecutionHelper.ExecSqlCommandScalar(config.AttQuery, context);
+                var attId = await new SqlExecutionHelper(context).ExecSqlCommandScalarAsync(config.AttQuery);
                 if (attId == null)
                     throw new Exception("Sql query not returning result");
 
-                return manager.GetAttachment(Convert.ToInt32(attId));
+                return await manager.GetAttachmentAsync(Convert.ToInt32(attId));
             }
         }
     }

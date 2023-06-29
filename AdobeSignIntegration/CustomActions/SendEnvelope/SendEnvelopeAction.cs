@@ -5,6 +5,7 @@ using WebCon.WorkFlow.SDK.ActionPlugins.Model;
 using System.Collections.Generic;
 using WebCon.WorkFlow.SDK.Documents.Model.ItemLists;
 using WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers;
+using System.Threading.Tasks;
 
 namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.SendEnvelope
 {
@@ -13,18 +14,18 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.SendEnvelope
         const string SignerRole = "SIGNER";
         const string AuthMethod = "PHONE";
 
-        public override void Run(RunCustomActionParams args)
+        public override async Task RunAsync(RunCustomActionParams args)
         {
             var log = new StringBuilder();
             try
             {              
-                var att = AttachmentHelper.GetAttachment(args.Context, Configuration.AttConfig, log);
+                var att = await AttachmentHelper.GetAttachmentAsync(args.Context, Configuration.AttConfig, log);
                 if (att == null)
                     throw new Exception("No attachment to signature");
 
-                var api = new AdobeSignHelper(log);
-                var docId = api.SendDocument(att.Content, Configuration.ApiConfig.TokenValue, $"{att.FileName}.{att.FileExtension}");                           
-                var operationId = api.SendToSig(docId, Configuration.ApiConfig.TokenValue, Configuration.MessageContent.MailSubject, Configuration.MessageContent.MailBody, GetMembersInfo(args.Context.CurrentDocument.ItemsLists.GetByID(Configuration.Users.SignersList.ItemListId)));
+                var api = new AdobeSignHelper(log, args.Context);
+                var docId = await api.SendDocumentAsync(att.Content, Configuration.ApiConfig.TokenValue, $"{att.FileName}.{att.FileExtension}");                           
+                var operationId = await api.SendToSigAsync(docId, Configuration.ApiConfig.TokenValue, Configuration.MessageContent.MailSubject, Configuration.MessageContent.MailBody, GetMembersInfo(args.Context.CurrentDocument.ItemsLists.GetByID(Configuration.Users.SignersList.ItemListId)));
 
                 args.Context.CurrentDocument.SetFieldValue(Configuration.AttConfig.AgreementsIdFild, operationId);
                 args.Context.CurrentDocument.SetFieldValue(Configuration.AttConfig.AttTechnicalFieldID, att.ID);                
@@ -38,7 +39,7 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.SendEnvelope
             finally
             {
                 args.LogMessage = log.ToString();
-                args.Context.PluginLogger.AppendInfo(log.ToString());
+                args.Context.PluginLogger?.AppendInfo(log.ToString());
             }
         }
       

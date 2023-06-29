@@ -7,6 +7,8 @@ using System.Text;
 using System;
 using WebCon.BpsExt.Signing.AdobeSign.CustomActions.Models;
 using System.Threading;
+using System.Threading.Tasks;
+using WebCon.WorkFlow.SDK.Common.Model;
 
 namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
 {
@@ -14,30 +16,34 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
     {
         const string BaseUri = "https://secure.na1.echosign.com/api/rest/v6/baseUris";              
         StringBuilder _log;
-        string _apiUrl;       
+        string _apiUrl;
+        private readonly BaseContext _context;
 
-        public AdobeSignHelper(StringBuilder log)
+        public AdobeSignHelper(StringBuilder log, BaseContext context)
         {
             ServicePointManager.SecurityProtocol = ServicePointManager.SecurityProtocol |
                                                    SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;           
-            _log = log;            
+            _log = log;
+            _context = context;
         }
 
-        private string GetBaseUri(string token)
+        private async Task<string> GetBaseUriAsync(string token)
         {
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var request = new HttpRequestMessage(HttpMethod.Get, BaseUri);
-            var response = client.SendAsync(request).Result;
+            var response = await client.SendAsync(request);
+            var jsonResult = await response.Content.ReadAsStringAsync();
+            _context.PluginLogger.AppendDebug(jsonResult);
             response.EnsureSuccessStatusCode();
-            var jsonResult = response.Content.ReadAsStringAsync().Result;
+
 
             return JsonConvert.DeserializeObject<UriModel>(jsonResult).apiAccessPoint + "/api/rest/v6";
         }
 
-        internal string GetSigningURL(string token, string agreementsId)
+        internal async Task<string> GetSigningURLAsync(string token, string agreementsId)
         {
-            var apiUrl = GetBaseUri(token);
+            var apiUrl = await GetBaseUriAsync(token);
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -46,8 +52,8 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
             for (int i = 0; i < 5; i++)//It's too fast! The API doesn't return the signingUrl
             {
                 var request = new HttpRequestMessage(HttpMethod.Get, $"{apiUrl}/agreements/{agreementsId}/signingUrls");
-                var response = client.SendAsync(request).Result;
-                jsonResult = response.Content.ReadAsStringAsync().Result;
+                var response = await client.SendAsync(request);
+                jsonResult = await response.Content.ReadAsStringAsync();
                 _log.AppendLine($"Response status {statusCode = response.StatusCode}:").AppendLine(jsonResult);
 
                 if (statusCode == HttpStatusCode.NotFound)                
@@ -62,9 +68,9 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
             return JsonConvert.DeserializeObject<Models.Self.SelfSignResponse>(jsonResult).signingUrlSetInfos[0].signingUrls[0].esignUrl;
         }
 
-        public string SendDocument(byte[] content, string token, string fileName)
+        public async Task<string> SendDocumentAsync(byte[] content, string token, string fileName)
         {
-            _apiUrl = GetBaseUri(token);
+            _apiUrl = await GetBaseUriAsync(token);
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var multiForm = new MultipartFormDataContent();
@@ -74,14 +80,15 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
 
             multiForm.Add(imageContent, "File", fileName);
 
-            var response = client.PostAsync($"{_apiUrl}/transientDocuments", multiForm).Result;
-            response.EnsureSuccessStatusCode();
-            var result = response.Content.ReadAsStringAsync().Result;
+            var response = await client.PostAsync($"{_apiUrl}/transientDocuments", multiForm);
+            var result = await response.Content.ReadAsStringAsync();
+            _context.PluginLogger.AppendDebug(result);
+            response.EnsureSuccessStatusCode();          
             _log.AppendLine("OperationId: " + result);
             return JsonConvert.DeserializeObject<Models.Send.DosumentResponseModel>(result).transientDocumentId;
         }
 
-        public string SendToSig(string docId, string token, string title, string msg, List<Models.Send.Participantsetsinfo> members, bool selfSign = false, string url = "")
+        public async Task<string> SendToSigAsync(string docId, string token, string title, string msg, List<Models.Send.Participantsetsinfo> members, bool selfSign = false, string url = "")
         {
             var jsonObject = new Models.Send.SendRequest();
             jsonObject.fileInfos = new Models.Send.Fileinfo[] { new Models.Send.Fileinfo() { transientDocumentId = docId } };
@@ -118,51 +125,51 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
                             }), Encoding.UTF8, "application/json")
             };
 
-            var response = client.SendAsync(request).Result;
-            response.EnsureSuccessStatusCode();
-            var result = response.Content.ReadAsStringAsync().Result;
+            var response = await client.SendAsync(request);
+            var result = await response.Content.ReadAsStringAsync();
+            _context.PluginLogger.AppendDebug(result);
+            response.EnsureSuccessStatusCode();         
             _log.AppendLine("AgreementsId:" + result);
             return JsonConvert.DeserializeObject<Models.Send.SigResponseModel>(result).id;
         }
 
-        public string GetStatus(string docId, string token)
+        public async Task<string> GetStatusAsync(string docId, string token)
         {
-            var apiUrl = GetBaseUri(token);
+            var apiUrl = await GetBaseUriAsync(token);
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
           
             var request = new HttpRequestMessage(HttpMethod.Get, $"{apiUrl}/agreements/{docId}");
 
-            var response = client.SendAsync(request).Result;
-            response.EnsureSuccessStatusCode();
-            var result = response.Content.ReadAsStringAsync().Result;
+            var response = await client.SendAsync(request);          
+            var result = await response.Content.ReadAsStringAsync();
             _log.AppendLine("Response:").AppendLine(result);
+            response.EnsureSuccessStatusCode();
 
             return JsonConvert.DeserializeObject<SingleStatusResponse>(result).status;
         }
 
-        public byte[] GetDocument(string docId, string token)
+        public async Task<byte[]> GetDocumentAsync(string docId, string token)
         {
-            var apiUrl = GetBaseUri(token);
+            var apiUrl = await GetBaseUriAsync(token);
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var request = new HttpRequestMessage(HttpMethod.Get, $"{apiUrl}/agreements/{docId}/combinedDocument");
-
-            var response = client.SendAsync(request).Result;
+            var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();                
 
-            return response.Content.ReadAsByteArrayAsync().Result;
+            return await response.Content.ReadAsByteArrayAsync();
         }
 
-        public void SendRemind(string docId, string token, List<string> membersId)
+        public async Task SendRemindAsync(string docId, string token, List<string> membersId)
         {
             var users = new List<string>();
             foreach(var id in membersId)
             {
                 users.Add(id);
             }
-            var apiUrl = GetBaseUri(token);
+            var apiUrl = await GetBaseUriAsync(token);
             var jsonObject = new Models.Remind.RemindRequest();
             jsonObject.status = "ACTIVE";
             jsonObject.recipientParticipantIds = users.ToArray();
@@ -177,51 +184,56 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
                                 NullValueHandling = NullValueHandling.Ignore
                             }), Encoding.UTF8, "application/json")
             };
-            var response = client.SendAsync(request).Result;
+            var response = await client.SendAsync(request);
+            var result = await response.Content.ReadAsStringAsync();
+            _context.PluginLogger.AppendDebug(result);
             response.EnsureSuccessStatusCode();
-            var result = response.Content.ReadAsStringAsync().Result;
             _log.AppendLine("AgreementsId:" + result);
         }
 
-        public Models.Remind.Memberinfo[] GetMembersIds(string operationId, string token)
+        public async Task<Models.Remind.Memberinfo[]> GetMembersIdsAsync(string operationId, string token)
         {
-            var apiUrl = GetBaseUri(token);
+            var apiUrl = await GetBaseUriAsync(token);
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var request = new HttpRequestMessage(HttpMethod.Get, $"{apiUrl}/agreements/{operationId}/members");
 
-            var response = client.SendAsync(request).Result;
-            response.EnsureSuccessStatusCode();
-            var result = response.Content.ReadAsStringAsync().Result;
+            var response = await client.SendAsync(request);
+            var result = await response.Content.ReadAsStringAsync();
             _log.AppendLine("Response:").AppendLine(result);
+            response.EnsureSuccessStatusCode();
 
             return JsonConvert.DeserializeObject<Models.Remind.ResponseMembersModel>(result).participantSets[0].memberInfos;            
         }
 
-        public void DeleteAgreement(string operationId, string token)
+        public async Task DeleteAgreementAsync(string operationId, string token)
         {
-            var apiUrl = GetBaseUri(token);
+            var apiUrl = await GetBaseUriAsync(token);
 
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);        
             var request = new HttpRequestMessage(HttpMethod.Delete, $"{apiUrl}/agreements/{operationId}/documents");
-            var response = client.SendAsync(request).Result;
-            response.EnsureSuccessStatusCode();
+            var response = await client.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                _context.PluginLogger.AppendDebug(await response.Content.ReadAsStringAsync());
+                response.EnsureSuccessStatusCode();
+            }           
         }
 
-        public Agreements GetAllStatus(string token)
+        public async Task<Agreements> GetAllStatusAsync(string token)
         {
-            var apiUrl = GetBaseUri(token);
+            var apiUrl = await GetBaseUriAsync(token);
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var request = new HttpRequestMessage(HttpMethod.Get, $"{apiUrl}/agreements");
 
-            var response = client.SendAsync(request).Result;
-            response.EnsureSuccessStatusCode();
-            var responseJson = response.Content.ReadAsStringAsync().Result;
+            var response = await client.SendAsync(request);
+            var responseJson = await response.Content.ReadAsStringAsync();
             _log.AppendLine("Response:").AppendLine(responseJson);
+            response.EnsureSuccessStatusCode();
 
             return JsonConvert.DeserializeObject<Agreements>(responseJson);
         }
