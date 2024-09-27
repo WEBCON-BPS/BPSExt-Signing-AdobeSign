@@ -1,58 +1,64 @@
-[  
-  {
-    "Guid": "FC53B98F-BF5B-43A8-9563-71BF689C42F5",
-    "Name": "SendEnvelopeToEmbededSign",
-    "Description": "Use this action to send an e-mail as a reminder to sign the document to selected people.",
-    "Assembly": "WebCon.BpsExt.Signing.AdobeSign",
-    "Class": "WebCon.BpsExt.Signing.AdobeSign.CustomActions.SendAndSignEnvelope.SendEnvelopeToEmbededSign",
-    "Type": "CustomAction"
-  },
-  {
-    "Guid": "950681ef-127b-4221-a91d-774c12f913c7",
-    "Name": "CheckAllDocumentsStatus",
-    "Description": "Use this action to check the status of all documents sent to be signed and move all signed documents along the selected path.",
-    "Assembly": "WebCon.BpsExt.Signing.AdobeSign",
-    "Class": "WebCon.BpsExt.Signing.AdobeSign.CustomActions.AllStatus.CheckAllDocStatusAction",
-    "Type": "CustomAction"
-  },
-  {
-    "Guid": "3c6545ec-d55b-4288-9782-a7cd375e1e86",
-    "Name": "DeleteEnvelope",
-    "Description": "This action allows you to cancel signing the document.",
-    "Assembly": "WebCon.BpsExt.Signing.AdobeSign",
-    "Class": "WebCon.BpsExt.Signing.AdobeSign.CustomActions.Delete.DeleteAgreementAction",
-    "Type": "CustomAction"
-  },
-  {
-    "Guid": "94b85b51-a52e-44f3-a5f1-469b0c4c3067",
-    "Name": "SendRemind",
-    "Description": "Use this action to send an e-mail as a reminder to sign the document to selected people.",
-    "Assembly": "WebCon.BpsExt.Signing.AdobeSign",
-    "Class": "WebCon.BpsExt.Signing.AdobeSign.CustomActions.Reminders.SendReminderAction",
-    "Type": "CustomAction"
-  },
-  {
-    "Guid": "5c606642-b5db-4c7b-af53-3c6236f03fda",
-    "Name": "DownloadDocument",
-    "Description": "The action downloads related signed document.",
-    "Assembly": "WebCon.BpsExt.Signing.AdobeSign",
-    "Class": "WebCon.BpsExt.Signing.AdobeSign.CustomActions.Download.DownloadDocAction",
-    "Type": "CustomAction"
-  },
-  {
-    "Guid": "f84a6127-cc9f-432c-9350-67cafac9c3ae",
-    "Name": "CheckDocumentStatus",
-    "Description": "This action checks the current status of the document sent to be signed.",
-    "Assembly": "WebCon.BpsExt.Signing.AdobeSign",
-    "Class": "WebCon.BpsExt.Signing.AdobeSign.CustomActions.Status.CheckDocStatusAction",
-    "Type": "CustomAction"
-  },
-  {
-    "Guid": "bad01b2c-7e45-48ad-93fc-a20d6649b3d7",
-    "Name": "SendEnvelope",
-    "Description": "Action sends selected documents to be signed in AdobeSign.",
-    "Assembly": "WebCon.BpsExt.Signing.AdobeSign",
-    "Class": "WebCon.BpsExt.Signing.AdobeSign.CustomActions.SendEnvelope.SendEnvelopeAction",
-    "Type": "CustomAction"
-  }
-]
+{
+  "extensions": [
+    {
+      "Guid": "FC53B98F-BF5B-43A8-9563-71BF689C42F5",
+      "Name": "SendEnvelopeToEmbededSign",
+      "Description": "Use this action to send an e-mail as a reminder to sign the document to selected people.",
+      "Assembly": "WebCon.BpsExt.Signing.AdobeSign",
+      "Class": "WebCon.BpsExt.Signing.AdobeSign.CustomActions.SendAndSignEnvelope.SendEnvelopeToEmbededSign",
+      "Type": "CustomAction"
+    },
+    {
+      "Guid": "950681ef-127b-4221-a91d-774c12f913c7",
+      "Name": "CheckAllDocumentsStatus",
+      "Description": "Use this action to check the status of all documents sent to be signed and move all signed documents along the selected path.",
+      "Assembly": "WebCon.BpsExt.Signing.AdobeSign",
+      "Class": "WebCon.BpsExt.Signing.AdobeSign.CustomActions.AllStatus.CheckAllDocStatusAction",
+      "Type": "CustomAction"
+    },
+    {
+      "Guid": "3c6545ec-d55b-4288-9782-a7cd375e1e86",
+      "Name": "DeleteEnvelope",
+      "Description": "This action allows you to cancel signing the document.",
+      "Assembly": "WebCon.BpsExt.Signing.AdobeSign",
+      "Class": "WebCon.BpsExt.Signing.AdobeSign.CustomActions.Delete.DeleteAgreementAction",
+      "Type": "CustomAction"
+    },
+    {
+      "Guid": "94b85b51-a52e-44f3-a5f1-469b0c4c3067",
+      "Name": "SendRemind",
+      "Description": "Use this action to send an e-mail as a reminder to sign the document to selected people.",
+      "Assembly": "WebCon.BpsExt.Signing.AdobeSign",
+      "Class": "WebCon.BpsExt.Signing.AdobeSign.CustomActions.Reminders.SendReminderAction",
+      "Type": "CustomAction"
+    },
+    {
+      "Guid": "5c606642-b5db-4c7b-af53-3c6236f03fda",
+      "Name": "DownloadDocument",
+      "Description": "The action downloads related signed document.",
+      "Assembly": "WebCon.BpsExt.Signing.AdobeSign",
+      "Class": "WebCon.BpsExt.Signing.AdobeSign.CustomActions.Download.DownloadDocAction",
+      "Type": "CustomAction"
+    },
+    {
+      "Guid": "f84a6127-cc9f-432c-9350-67cafac9c3ae",
+      "Name": "CheckDocumentStatus",
+      "Description": "This action checks the current status of the document sent to be signed.",
+      "Assembly": "WebCon.BpsExt.Signing.AdobeSign",
+      "Class": "WebCon.BpsExt.Signing.AdobeSign.CustomActions.Status.CheckDocStatusAction",
+      "Type": "CustomAction"
+    },
+    {
+      "Guid": "bad01b2c-7e45-48ad-93fc-a20d6649b3d7",
+      "Name": "SendEnvelope",
+      "Description": "Action sends selected documents to be signed in AdobeSign.",
+      "Assembly": "WebCon.BpsExt.Signing.AdobeSign",
+      "Class": "WebCon.BpsExt.Signing.AdobeSign.CustomActions.SendEnvelope.SendEnvelopeAction",
+      "Type": "CustomAction"
+    }
+  ],
+  "dependencies": [
+    "WebCon.BpsExt.Signing.AdobeSign"
+  ],
+  "version": "24"
+}
