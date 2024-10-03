@@ -22,7 +22,7 @@ jobs:
       with:
         name: WebCon.BpsExt.Signing.AdobeSign
         path: |
-          AdobeSignIntegration/bin/Release/netstandard2.0/WebCon.BpsExt.Signing.AdobeSign.dll
-          AdobeSignIntegration/bin/Release/netstandard2.0/WebCon.BpsExt.Signing.AdobeSign.json
-          AdobeSignIntegration/bin/Release/netstandard2.0/Newtonsoft.Json.dll
+          WebCon.BpsExt.Signing.AdobeSign/bin/Release/netstandard2.0/WebCon.BpsExt.Signing.AdobeSign.dll
+          WebCon.BpsExt.Signing.AdobeSign/bin/Release/netstandard2.0/WebCon.BpsExt.Signing.AdobeSign.json
+          WebCon.BpsExt.Signing.AdobeSign/bin/Release/netstandard2.0/Newtonsoft.Json.dll
           

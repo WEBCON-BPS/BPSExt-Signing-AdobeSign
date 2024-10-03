@@ -49,7 +49,7 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Download
         {
             var sourceAttData = context.CurrentDocument.GetFieldValue(Configuration.AttConfig.AttTechnicalFieldID)?.ToString();
             var sourceAtt = await context.CurrentDocument.Attachments.GetByIDAsync(Convert.ToInt32(sourceAttData));
-            sourceAtt.Content = newAttContent;
+            sourceAtt.SetContent(newAttContent);
             if (sourceAtt.FileExtension.Equals(".pdf", StringComparison.InvariantCultureIgnoreCase))
                 sourceAtt.FileName = $"{Path.GetFileNameWithoutExtension(sourceAtt.FileName)}{Configuration.AttConfig.AttSufix}{sourceAtt.FileExtension}";
             else

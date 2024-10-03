@@ -5,7 +5,6 @@ using WebCon.WorkFlow.SDK.ActionPlugins;
 using WebCon.WorkFlow.SDK.ActionPlugins.Model;
 using WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers;
 using WebCon.WorkFlow.SDK.Documents.Model.Attachments;
-using WebCon.WorkFlow.SDK.Documents.Model;
 using System.Threading.Tasks;
 
 namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.SendAndSignEnvelope
@@ -44,11 +43,12 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.SendAndSignEnvelope
         private async Task<string> CallAdobeApiAsync(AttachmentData att, ActionContextInfo context)
         {
             var api = new AdobeSignHelper(_log, context);
-            var documentId = await api.SendDocumentAsync(att.Content, Configuration.ApiConfig.TokenValue, $"{att.FileName}.{att.FileExtension}");
+            var content = await att.GetContentAsync();
+            var documentId = await api.SendDocumentAsync(content, Configuration.ApiConfig.TokenValue, $"{att.FileName}.{att.FileExtension}");
             var agreementsId = await api.SendToSigAsync(documentId, Configuration.ApiConfig.TokenValue, Configuration.MessageContent.MailSubject, Configuration.MessageContent.MailBody, GetMemberInfo(), true, Configuration.RedirectUrl);
 
-            context.CurrentDocument.SetFieldValue(Configuration.AttConfig.AgreementsIdFild, agreementsId);
-            context.CurrentDocument.SetFieldValue(Configuration.AttConfig.AttTechnicalFieldID, att.ID);
+            await context.CurrentDocument.SetFieldValueAsync(Configuration.AttConfig.AgreementsIdFild, agreementsId);
+            await context.CurrentDocument.SetFieldValueAsync(Configuration.AttConfig.AttTechnicalFieldID, att.ID);
 
             return await api.GetSigningURLAsync(Configuration.ApiConfig.TokenValue, agreementsId);
         }

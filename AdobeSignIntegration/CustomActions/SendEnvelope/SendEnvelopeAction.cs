@@ -24,11 +24,12 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.SendEnvelope
                     throw new Exception("No attachment to signature");
 
                 var api = new AdobeSignHelper(log, args.Context);
-                var docId = await api.SendDocumentAsync(att.Content, Configuration.ApiConfig.TokenValue, $"{att.FileName}.{att.FileExtension}");                           
+                var content = await att.GetContentAsync();
+                var docId = await api.SendDocumentAsync(content, Configuration.ApiConfig.TokenValue, $"{att.FileName}.{att.FileExtension}");                           
                 var operationId = await api.SendToSigAsync(docId, Configuration.ApiConfig.TokenValue, Configuration.MessageContent.MailSubject, Configuration.MessageContent.MailBody, GetMembersInfo(args.Context.CurrentDocument.ItemsLists.GetByID(Configuration.Users.SignersList.ItemListId)));
 
-                args.Context.CurrentDocument.SetFieldValue(Configuration.AttConfig.AgreementsIdFild, operationId);
-                args.Context.CurrentDocument.SetFieldValue(Configuration.AttConfig.AttTechnicalFieldID, att.ID);                
+                await args.Context.CurrentDocument.SetFieldValueAsync(Configuration.AttConfig.AgreementsIdFild, operationId);
+                await args.Context.CurrentDocument.SetFieldValueAsync(Configuration.AttConfig.AttTechnicalFieldID, att.ID);                
             }
             catch (Exception e)
             {
