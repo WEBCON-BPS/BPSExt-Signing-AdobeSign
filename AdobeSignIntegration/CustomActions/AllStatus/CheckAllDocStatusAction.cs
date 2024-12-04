@@ -24,8 +24,8 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.AllStatus
             var log = new StringBuilder();
             try
             {
-                var api = new AdobeSignHelper(log, args.Context); 
-                var agreements = await api.GetAllStatusAsync(Configuration.TokenValue);
+                var api = new AdobeSignHelper(log, args.Context, Configuration); 
+                var agreements = await api.GetAllStatusAsync();
                 await CheckAndMoveElementsAsync(agreements.userAgreementList?.ToList(), args.Context);
             }
             catch (Exception e)

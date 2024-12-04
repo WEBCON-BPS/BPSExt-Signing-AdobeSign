@@ -46,7 +46,9 @@
     <Compile Include="CustomActions\Download\DownloadDocActionConfig.cs" />
     <Compile Include="CustomActions\Helpers\AdobeSignHelper.cs" />
     <Compile Include="CustomActions\Helpers\AttachmentHelper.cs" />
+    <Compile Include="CustomActions\Helpers\ProxyProvider.cs" />
     <Compile Include="CustomActions\Models\Configuration\AttachmentConfig.cs" />
+    <Compile Include="CustomActions\Models\Configuration\BaseConfiguration.cs" />
     <Compile Include="CustomActions\Models\GlobalStatusResponse.cs" />
     <Compile Include="CustomActions\Models\RemindRequest.cs" />
     <Compile Include="CustomActions\Models\SelfSignResponse.cs" />

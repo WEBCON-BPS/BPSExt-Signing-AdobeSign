@@ -42,15 +42,15 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.SendAndSignEnvelope
 
         private async Task<string> CallAdobeApiAsync(AttachmentData att, ActionContextInfo context)
         {
-            var api = new AdobeSignHelper(_log, context);
+            var api = new AdobeSignHelper(_log, context, Configuration.ApiConfig);
             var content = await att.GetContentAsync();
-            var documentId = await api.SendDocumentAsync(content, Configuration.ApiConfig.TokenValue, $"{att.FileName}.{att.FileExtension}");
-            var agreementsId = await api.SendToSigAsync(documentId, Configuration.ApiConfig.TokenValue, Configuration.MessageContent.MailSubject, Configuration.MessageContent.MailBody, GetMemberInfo(), true, Configuration.RedirectUrl);
+            var documentId = await api.SendDocumentAsync(content, $"{att.FileName}.{att.FileExtension}");
+            var agreementsId = await api.SendToSigAsync(documentId, Configuration.MessageContent.MailSubject, Configuration.MessageContent.MailBody, GetMemberInfo(), true, Configuration.RedirectUrl);
 
             await context.CurrentDocument.SetFieldValueAsync(Configuration.AttConfig.AgreementsIdFild, agreementsId);
             await context.CurrentDocument.SetFieldValueAsync(Configuration.AttConfig.AttTechnicalFieldID, att.ID);
 
-            return await api.GetSigningURLAsync(Configuration.ApiConfig.TokenValue, agreementsId);
+            return await api.GetSigningURLAsync(agreementsId);
         }
 
         private List<Models.Send.Participantsetsinfo> GetMemberInfo()

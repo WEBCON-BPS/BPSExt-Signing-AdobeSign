@@ -22,8 +22,8 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Download
                 if (!string.IsNullOrEmpty(status) && status.Equals(Models.Statuses.Signed, StringComparison.InvariantCultureIgnoreCase))
                 {
                     var docId = args.Context.CurrentDocument.GetFieldValue(Configuration.InputParams.OperationFieldId)?.ToString();
-                    var api = new AdobeSignHelper(log, args.Context);
-                    var content = await api.GetDocumentAsync(docId, Configuration.ApiConfig.TokenValue);
+                    var api = new AdobeSignHelper(log, args.Context, Configuration.ApiConfig);
+                    var content = await api.GetDocumentAsync(docId);
                     await SaveAttAsync(args.Context, content);
                 }
                 else

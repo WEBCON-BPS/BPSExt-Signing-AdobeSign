@@ -7,7 +7,7 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.SendAndSignEnvelope
     public class SendEnvelopeToEmbededSignConfig : PluginConfiguration
     {
         [ConfigGroupBox(DisplayName = "AdobeSign API Settings")]
-        public ApiConfiguration ApiConfig { get; set; }
+        public BaseConfiguration ApiConfig { get; set; }
 
         [ConfigGroupBox(DisplayName = "Attachment selection")]
         public InputAttConfig AttConfig { get; set; }
@@ -20,12 +20,6 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.SendAndSignEnvelope
 
         [ConfigEditableText(DisplayName = "Url to the form", IsRequired = true)]
         public string RedirectUrl { get; set; }
-    }
-
-    public class ApiConfiguration
-    {
-        [ConfigEditableText(DisplayName = "Integration Key", Description = "Create a integration key: https://adobe.lookbookhq.com/sign-recommend/ACMIG04", IsRequired = true)]
-        public string TokenValue { get; set; }
     }
 
     public class MessageContent

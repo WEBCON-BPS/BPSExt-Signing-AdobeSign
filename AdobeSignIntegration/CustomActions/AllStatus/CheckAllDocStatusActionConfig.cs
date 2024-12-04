@@ -1,12 +1,10 @@
-﻿using WebCon.WorkFlow.SDK.Common;
+﻿using WebCon.BpsExt.Signing.AdobeSign.CustomActions.Models.Configuration;
 using WebCon.WorkFlow.SDK.ConfigAttributes;
 
 namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.AllStatus
 {
-    public class CheckAllDocStatusActionConfig : PluginConfiguration
+    public class CheckAllDocStatusActionConfig : BaseConfiguration
     {
-        [ConfigEditableText(DisplayName = "Integration Key", Description = "Create a integration key: https://adobe.lookbookhq.com/sign-recommend/ACMIG04", IsRequired = true)]
-        public string TokenValue { get; set; }
 
         [ConfigGroupBox(DisplayName = "Workflow section")]
         public WorkflowConfig Workflow { get; set; }      

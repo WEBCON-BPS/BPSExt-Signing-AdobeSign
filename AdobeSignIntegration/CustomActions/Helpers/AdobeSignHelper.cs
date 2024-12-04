@@ -9,6 +9,8 @@ using WebCon.BpsExt.Signing.AdobeSign.CustomActions.Models;
 using System.Threading;
 using System.Threading.Tasks;
 using WebCon.WorkFlow.SDK.Common.Model;
+using WebCon.WorkFlow.SDK.Tools.Data;
+using WebCon.BpsExt.Signing.AdobeSign.CustomActions.Models.Configuration;
 
 namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
 {
@@ -18,19 +20,24 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
         StringBuilder _log;
         string _apiUrl;
         private readonly BaseContext _context;
+        private string _token;
+        private ConnectionsHelper _connectionsHelper;
+        private bool _useProxy;
 
-        public AdobeSignHelper(StringBuilder log, BaseContext context)
+        public AdobeSignHelper(StringBuilder log, BaseContext context, BaseConfiguration config)
         {
             ServicePointManager.SecurityProtocol = ServicePointManager.SecurityProtocol |
                                                    SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;           
             _log = log;
             _context = context;
+            _token = config.TokenValue;
+            _useProxy = config.UseProxy;
+            _connectionsHelper = new ConnectionsHelper(context);
         }
 
-        private async Task<string> GetBaseUriAsync(string token)
+        private async Task<string> GetBaseUriAsync()
         {
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var client = GetClient(BaseUri);
             var request = new HttpRequestMessage(HttpMethod.Get, BaseUri);
             var response = await client.SendAsync(request);
             var jsonResult = await response.Content.ReadAsStringAsync();
@@ -41,11 +48,10 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
             return JsonConvert.DeserializeObject<UriModel>(jsonResult).apiAccessPoint + "/api/rest/v6";
         }
 
-        internal async Task<string> GetSigningURLAsync(string token, string agreementsId)
+        internal async Task<string> GetSigningURLAsync(string agreementsId)
         {
-            var apiUrl = await GetBaseUriAsync(token);
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var apiUrl = await GetBaseUriAsync();
+            var client = GetClient(apiUrl);
 
             string jsonResult = "";
             var statusCode = HttpStatusCode.NotFound;
@@ -68,11 +74,10 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
             return JsonConvert.DeserializeObject<Models.Self.SelfSignResponse>(jsonResult).signingUrlSetInfos[0].signingUrls[0].esignUrl;
         }
 
-        public async Task<string> SendDocumentAsync(byte[] content, string token, string fileName)
+        public async Task<string> SendDocumentAsync(byte[] content, string fileName)
         {
-            _apiUrl = await GetBaseUriAsync(token);
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            _apiUrl = await GetBaseUriAsync();
+            var client = GetClient(_apiUrl);
             var multiForm = new MultipartFormDataContent();
 
             var imageContent = new ByteArrayContent(content);
@@ -88,7 +93,7 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
             return JsonConvert.DeserializeObject<Models.Send.DosumentResponseModel>(result).transientDocumentId;
         }
 
-        public async Task<string> SendToSigAsync(string docId, string token, string title, string msg, List<Models.Send.Participantsetsinfo> members, bool selfSign = false, string url = "")
+        public async Task<string> SendToSigAsync(string docId, string title, string msg, List<Models.Send.Participantsetsinfo> members, bool selfSign = false, string url = "")
         {
             var jsonObject = new Models.Send.SendRequest();
             jsonObject.fileInfos = new Models.Send.Fileinfo[] { new Models.Send.Fileinfo() { transientDocumentId = docId } };
@@ -114,8 +119,7 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
                 }
             };
 
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var client = GetClient(_apiUrl);
             var request = new HttpRequestMessage(HttpMethod.Post, $"{_apiUrl}/agreements")
             {
                 Content = new StringContent(JsonConvert.SerializeObject(jsonObject, Formatting.None,
@@ -133,12 +137,11 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
             return JsonConvert.DeserializeObject<Models.Send.SigResponseModel>(result).id;
         }
 
-        public async Task<string> GetStatusAsync(string docId, string token)
+        public async Task<string> GetStatusAsync(string docId)
         {
-            var apiUrl = await GetBaseUriAsync(token);
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-          
+            var apiUrl = await GetBaseUriAsync();
+            var client = GetClient(apiUrl);
+
             var request = new HttpRequestMessage(HttpMethod.Get, $"{apiUrl}/agreements/{docId}");
 
             var response = await client.SendAsync(request);          
@@ -149,11 +152,10 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
             return JsonConvert.DeserializeObject<SingleStatusResponse>(result).status;
         }
 
-        public async Task<byte[]> GetDocumentAsync(string docId, string token)
+        public async Task<byte[]> GetDocumentAsync(string docId)
         {
-            var apiUrl = await GetBaseUriAsync(token);
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var apiUrl = await GetBaseUriAsync();
+            var client = GetClient(apiUrl);
 
             var request = new HttpRequestMessage(HttpMethod.Get, $"{apiUrl}/agreements/{docId}/combinedDocument");
             var response = await client.SendAsync(request);
@@ -162,20 +164,19 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
             return await response.Content.ReadAsByteArrayAsync();
         }
 
-        public async Task SendRemindAsync(string docId, string token, List<string> membersId)
+        public async Task SendRemindAsync(string docId, List<string> membersId)
         {
             var users = new List<string>();
             foreach(var id in membersId)
             {
                 users.Add(id);
             }
-            var apiUrl = await GetBaseUriAsync(token);
+            var apiUrl = await GetBaseUriAsync();
             var jsonObject = new Models.Remind.RemindRequest();
             jsonObject.status = "ACTIVE";
             jsonObject.recipientParticipantIds = users.ToArray();
 
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var client = GetClient(apiUrl);
             var request = new HttpRequestMessage(HttpMethod.Post, $"{apiUrl}/agreements/{docId}/reminders")
             {
                 Content = new StringContent(JsonConvert.SerializeObject(jsonObject, Formatting.None,
@@ -191,11 +192,10 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
             _log.AppendLine("AgreementsId:" + result);
         }
 
-        public async Task<Models.Remind.Memberinfo[]> GetMembersIdsAsync(string operationId, string token)
+        public async Task<Models.Remind.Memberinfo[]> GetMembersIdsAsync(string operationId)
         {
-            var apiUrl = await GetBaseUriAsync(token);
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var apiUrl = await GetBaseUriAsync();
+            var client = GetClient(apiUrl);
 
             var request = new HttpRequestMessage(HttpMethod.Get, $"{apiUrl}/agreements/{operationId}/members");
 
@@ -207,12 +207,11 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
             return JsonConvert.DeserializeObject<Models.Remind.ResponseMembersModel>(result).participantSets[0].memberInfos;            
         }
 
-        public async Task DeleteAgreementAsync(string operationId, string token)
+        public async Task DeleteAgreementAsync(string operationId)
         {
-            var apiUrl = await GetBaseUriAsync(token);
+            var apiUrl = await GetBaseUriAsync();
 
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);        
+            var client = GetClient(apiUrl);
             var request = new HttpRequestMessage(HttpMethod.Delete, $"{apiUrl}/agreements/{operationId}/documents");
             var response = await client.SendAsync(request);
             if (!response.IsSuccessStatusCode)
@@ -222,11 +221,10 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
             }           
         }
 
-        public async Task<Agreements> GetAllStatusAsync(string token)
+        public async Task<Agreements> GetAllStatusAsync()
         {
-            var apiUrl = await GetBaseUriAsync(token);
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var apiUrl = await GetBaseUriAsync();
+            var client = GetClient(apiUrl);
 
             var request = new HttpRequestMessage(HttpMethod.Get, $"{apiUrl}/agreements");
 
@@ -236,6 +234,15 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Helpers
             response.EnsureSuccessStatusCode();
 
             return JsonConvert.DeserializeObject<Agreements>(responseJson);
+        }
+
+
+        private HttpClient GetClient(string url)
+        {
+            var proxy = ProxyProvider.TryGetProxy(url, _useProxy, _connectionsHelper);
+            var client = proxy == null ? new HttpClient() : new HttpClient(new HttpClientHandler() { Proxy = proxy });
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+            return client;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using WebCon.WorkFlow.SDK.Common;
+﻿using WebCon.BpsExt.Signing.AdobeSign.CustomActions.Models.Configuration;
+using WebCon.WorkFlow.SDK.Common;
 using WebCon.WorkFlow.SDK.ConfigAttributes;
 
 namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Download
@@ -6,7 +7,7 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Download
     public class DownloadDocActionConfig : PluginConfiguration
     {
         [ConfigGroupBox(DisplayName = "AdobeSign API Settings")]
-        public ApiConfiguration ApiConfig { get; set; }
+        public BaseConfiguration ApiConfig { get; set; }
 
         [ConfigGroupBox(DisplayName = "Attachment selection")]
         public AttConfig AttConfig { get; set; }
@@ -25,12 +26,6 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Download
 
         [ConfigEditableFormFieldID(DisplayName = "Copy source attachment ID", Description = "Select the technical field where the source attachment ID was saved.")]
         public int AttTechnicalFieldID { get; set; }
-    }
-
-    public class ApiConfiguration
-    {
-        [ConfigEditableText(DisplayName = "Integration Key", Description = "Create a integration key: https://adobe.lookbookhq.com/sign-recommend/ACMIG04", IsRequired = true)]
-        public string TokenValue { get; set; }       
     }
 
     public class InputParameters
