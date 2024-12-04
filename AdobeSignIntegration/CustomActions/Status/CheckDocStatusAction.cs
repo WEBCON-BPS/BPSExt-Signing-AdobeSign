@@ -15,8 +15,8 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Status
             try
             {
                 var docId = args.Context.CurrentDocument.GetFieldValue(Configuration.DokFildId)?.ToString();
-                var api = new AdobeSignHelper(log, args.Context);
-                var status = await api.GetStatusAsync(docId, Configuration.TokenValue);
+                var api = new AdobeSignHelper(log, args.Context, Configuration);
+                var status = await api.GetStatusAsync(docId);
                 await args.Context.CurrentDocument.SetFieldValueAsync(Configuration.StatusFildId, status);
             }
             catch(Exception e)

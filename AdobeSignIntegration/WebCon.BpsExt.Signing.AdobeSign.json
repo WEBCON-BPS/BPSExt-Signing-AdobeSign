@@ -60,5 +60,5 @@
   "dependencies": [
     "WebCon.BpsExt.Signing.AdobeSign"
   ],
-  "version": "24"
+  "version": "25"
 }

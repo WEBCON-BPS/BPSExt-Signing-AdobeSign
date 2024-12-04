@@ -21,10 +21,10 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Reminders
                 if (!string.IsNullOrEmpty(status) && !status.Equals(Models.Statuses.Signed, StringComparison.InvariantCultureIgnoreCase))
                 {
                     var docId = args.Context.CurrentDocument.GetFieldValue(Configuration.ApiConfig.OperationFildId)?.ToString();
-                    var api = new AdobeSignHelper(log, args.Context);
-                    var membersInfo = await api.GetMembersIdsAsync(docId, Configuration.ApiConfig.TokenValue);
+                    var api = new AdobeSignHelper(log, args.Context, Configuration.ApiConfig);
+                    var membersInfo = await api.GetMembersIdsAsync(docId);
                     var users = GetUsers(args.Context.CurrentDocument.ItemsLists.GetByID(Configuration.Users.SignersList.ItemListId), membersInfo.ToList());
-                    await api.SendRemindAsync(docId, Configuration.ApiConfig.TokenValue, users);
+                    await api.SendRemindAsync(docId, users);
                 }
                 else
                 {

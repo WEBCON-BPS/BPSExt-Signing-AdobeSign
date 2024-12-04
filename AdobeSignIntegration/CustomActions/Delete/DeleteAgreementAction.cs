@@ -15,8 +15,8 @@ namespace WebCon.BpsExt.Signing.AdobeSign.CustomActions.Delete
             try
             {
                 var operationId = args.Context.CurrentDocument.GetFieldValue(Configuration.OperationFildId)?.ToString();
-                var api = new AdobeSignHelper(log, args.Context);
-                await api.DeleteAgreementAsync(operationId, Configuration.TokenValue);
+                var api = new AdobeSignHelper(log, args.Context, Configuration);
+                await api.DeleteAgreementAsync(operationId);
             }
             catch (Exception e)
             {
