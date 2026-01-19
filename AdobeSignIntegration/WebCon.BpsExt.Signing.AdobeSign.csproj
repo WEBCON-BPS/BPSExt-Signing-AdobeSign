@@ -8,7 +8,7 @@
     <AssemblyName>WebCon.BpsExt.Signing.AdobeSign</AssemblyName>
     <TargetFramework>net9.0</TargetFramework>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>WEBCON_Key.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>tmpKey.snk</AssemblyOriginatorKeyFile>
 	<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	  <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 	  <EnableDefaultItems>false</EnableDefaultItems>
